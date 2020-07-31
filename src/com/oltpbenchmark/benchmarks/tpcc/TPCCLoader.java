@@ -117,6 +117,14 @@ public class TPCCLoader extends Loader<TPCCBenchmark> {
             threads.add(t);
         } // FOR
 
+        // Create the PG SQL procedures that are required for the execution.
+        threads.add(new LoaderThread() {
+            @Override
+            public void load(Connection conn) throws SQLException {
+                CreatePgSqlProcedures(conn);
+            }
+        });
+
         if (workConf.getEnableForeignKeysAfterLoad() && workConf.getShouldEnableForeignKeys()) {
             threads.add(new LoaderThread() {
                 @Override
@@ -162,6 +170,7 @@ public class TPCCLoader extends Loader<TPCCBenchmark> {
 
     protected void EnableForeignKeyConstraints(Connection conn) {
         try {
+          CreatePgSqlProcedures(conn);
             Statement st = conn.createStatement();
             String sql;
 
@@ -189,6 +198,32 @@ public class TPCCLoader extends Loader<TPCCBenchmark> {
             LOG.debug(se.getMessage());
             transRollback(conn);
         }
+    }
+
+    protected void CreatePgSqlProcedures(Connection conn) throws SQLException {
+      try {
+        Statement st = conn.createStatement();
+
+        StringBuilder argsSb = new StringBuilder();
+        StringBuilder updateStatements = new StringBuilder();
+
+        argsSb.append("wid int");
+        for (int i = 1; i <= 15; ++i) {
+          argsSb.append(String.format(", i%d int, q%d int, y%d int, r%d int", i, i, i, i));
+          updateStatements.append(String.format(
+            "UPDATE STOCK SET S_QUANTITY = q%d, S_YTD = y%d, S_ORDER_CNT = S_ORDER_CNT + 1, S_REMOTE_CNT = r%d WHERE S_W_ID = wid AND S_I_ID = i%d;",
+            i, i, i, i));
+          String updateStmt =
+            String.format("CREATE PROCEDURE updatestock%d (%s) AS '%s' LANGUAGE sql;",
+                          i, argsSb.toString(), updateStatements.toString());
+
+          st.execute(String.format("DROP PROCEDURE IF EXISTS updatestock%d", i));
+          st.execute(updateStmt);
+        }
+      } catch (SQLException se) {
+        LOG.error(se.getMessage());
+        throw se;
+      }
     }
 
     protected int loadItems(Connection conn, int itemKount) {
