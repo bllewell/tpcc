@@ -98,7 +98,7 @@ public class DBWorkload {
         pluginConfig.setExpressionEngine(new XPathExpressionEngine());
         Options options = new Options();
         options.addOption(
-                "c",
+                null,
                 "config",
                 true,
                 "Workload configuration file [default: config/workload_all.xml]");
@@ -122,35 +122,11 @@ public class DBWorkload {
                 "execute",
                 true,
                 "Execute the benchmark workload");
-        options.addOption(
-                null,
-                "runscript",
-                true,
-                "Run an SQL script");
-        options.addOption(
-                null,
-                "upload",
-                true,
-                "Upload the result");
-        options.addOption(
-                null,
-                "uploadHash",
-                true,
-                "git hash to be associated with the upload");
 
         options.addOption("v", "verbose", false, "Display Messages");
         options.addOption("h", "help", false, "Print this help");
-        options.addOption("s", "sample", true, "Sampling window");
-        options.addOption("im", "interval-monitor", true, "Throughput Monitoring Interval in milliseconds");
-        options.addOption("ss", false, "Verbose Sampling per Transaction");
         options.addOption("o", "output", true, "Output file (default System.out)");
-        options.addOption("d", "directory", true, "Base directory for the result files, default is current directory");
-        options.addOption("t", "timestamp", false, "Each result file is prepended with a timestamp for the beginning of the experiment");
-        options.addOption("ts", "tracescript", true, "Script of transactions to execute");
-        options.addOption(null, "histograms", false, "Print txn histograms");
-        options.addOption(null, "dialects-export", true, "Export benchmark SQL to a dialects file");
-        options.addOption(null, "output-raw", true, "Output raw data");
-        options.addOption(null, "output-samples", true, "Output sample data");
+        options.addOption(null, "directory", true, "Base directory for the result files, default is current directory");
 
         options.addOption(null, "nodes", true, "comma separated list of nodes (default 127.0.0.1)");
         options.addOption(null, "warehouses", true, "Number of warehouses (default 10)");
